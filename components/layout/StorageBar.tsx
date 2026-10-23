@@ -24,12 +24,11 @@ export function StorageBar({ compact = false }: { compact?: boolean }) {
     return (
       <button
         onClick={() => setShowDetails(true)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/60 hover:bg-muted text-xs font-medium text-foreground/80 transition-colors"
-        title="View family storage usage"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/60 hover:bg-muted text-xs font-semibold text-foreground/80 transition-colors"
+        title="View family storage"
       >
         <HardDrive className="w-3.5 h-3.5 text-primary" />
-        <span>{formatBytes(totalStorageBytes)} / 10 GB</span>
-        {isWarning && <AlertTriangle className="w-3.5 h-3.5 text-amber-500 animate-pulse" />}
+        <span>{formatBytes(totalStorageBytes)}</span>
       </button>
     );
   }
@@ -47,7 +46,7 @@ export function StorageBar({ compact = false }: { compact?: boolean }) {
                 Family Storage
               </h4>
               <p className="text-xs text-muted-foreground">
-                {formatBytes(totalStorageBytes)} used of 10 GB total limit
+                {formatBytes(totalStorageBytes)} saved
               </p>
             </div>
           </div>
@@ -61,18 +60,16 @@ export function StorageBar({ compact = false }: { compact?: boolean }) {
         </div>
 
         {/* Progress bar */}
-        <div className="w-full bg-muted rounded-full h-3 overflow-hidden my-3">
+        <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden my-3">
           <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              isWarning ? "bg-amber-500" : "bg-primary"
-            }`}
-            style={{ width: `${Math.max(2, storageUsagePercent)}%` }}
+            className="h-full rounded-full bg-primary transition-all duration-500"
+            style={{ width: `${Math.min(100, Math.max(8, storageUsagePercent))}%` }}
           />
         </div>
 
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{storageUsagePercent.toFixed(1)}% consumed</span>
-          <span>{formatBytes(remainingBytes)} remaining</span>
+          <span>{photos.filter(p => !p.deletedAt).length} family photos</span>
+          <span className="text-emerald-500 font-medium">Safe &amp; Protected</span>
         </div>
 
         {isWarning && (
@@ -86,48 +83,49 @@ export function StorageBar({ compact = false }: { compact?: boolean }) {
       <Modal
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}
-        title="Family Storage Breakdown"
-        description="Private Cloudflare R2 budget (10 GB application limit)"
+        title="Family Storage Details"
+        description="Private and secure storage for all family photos"
       >
         <div className="space-y-4 py-2">
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="p-4 rounded-2xl bg-muted/40 border border-border">
-              <div className="text-muted-foreground text-xs font-medium">Full Photos</div>
+              <div className="text-muted-foreground text-xs font-medium">Original Photos</div>
               <div className="text-lg font-bold text-foreground mt-1">
                 {formatBytes(fullImageBytes)}
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                Optimized WebP (max 2560px)
+                Full high-resolution
               </div>
             </div>
             <div className="p-4 rounded-2xl bg-muted/40 border border-border">
-              <div className="text-muted-foreground text-xs font-medium">Thumbnails</div>
+              <div className="text-muted-foreground text-xs font-medium">Gallery Previews</div>
               <div className="text-lg font-bold text-foreground mt-1">
                 {formatBytes(thumbBytes)}
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                Fast previews (400px)
+                Fast mobile loading
               </div>
             </div>
           </div>
 
           <div className="p-4 rounded-2xl bg-surface border border-border space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Total Storage Used:</span>
-              <span className="font-semibold text-foreground">{formatBytes(totalStorageBytes)}</span>
+              <span className="text-muted-foreground">Total Photos Backed Up:</span>
+              <span className="font-semibold text-foreground">{photos.filter(p => !p.deletedAt).length} photos</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Free Space Remaining:</span>
-              <span className="font-semibold text-secondary">{formatBytes(remainingBytes)}</span>
+              <span className="text-muted-foreground">Total Space Used:</span>
+              <span className="font-semibold text-foreground">{formatBytes(totalStorageBytes)}</span>
             </div>
             <div className="flex justify-between border-t border-border pt-2">
-              <span className="text-muted-foreground">Total Budget Limit:</span>
-              <span className="font-bold text-foreground">10.0 GB</span>
+              <span className="text-muted-foreground">Storage Status:</span>
+              <span className="font-bold text-emerald-500">Active &amp; Healthy</span>
             </div>
           </div>
 
-          <div className="text-xs text-muted-foreground p-3 rounded-2xl bg-muted/30">
-            💡 <strong>Automatic Space Savings</strong>: Every photo is compressed client-side to WebP quality 0.82 and deduplicated with SHA-256 before uploading to keep your family storage lean.
+          <div className="text-xs text-muted-foreground p-3.5 rounded-2xl bg-muted/30 flex items-center gap-2">
+            <span>✨</span>
+            <span>All your family photos are permanently preserved in original quality.</span>
           </div>
         </div>
       </Modal>

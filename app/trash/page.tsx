@@ -100,7 +100,7 @@ export default function TrashPage() {
         isOpen={!!photoToPurge}
         onClose={() => setPhotoToPurge(null)}
         title="Permanently Delete Photo?"
-        description="This action cannot be undone. The photo file will be completely wiped from Cloudflare R2 storage."
+        description="This action cannot be undone. The photo will be permanently removed from your family vault."
       >
         <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm flex items-start gap-3 mb-6">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />

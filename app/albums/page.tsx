@@ -34,14 +34,6 @@ export default function AlbumsPage() {
         </Button>
       </div>
 
-      {/* Zero Duplicate Explainer Banner */}
-      <div className="p-4 rounded-3xl bg-secondary/10 border border-secondary/20 flex items-center gap-3 text-xs sm:text-sm text-foreground">
-        <Sparkles className="w-5 h-5 text-secondary shrink-0" />
-        <p>
-          <strong>Zero Storage Waste</strong>: Photos can be added to multiple albums without copying or re-uploading the file. Deleting an album never deletes your original photos.
-        </p>
-      </div>
-
       {/* Albums Grid or Empty State */}
       {albums.length === 0 ? (
         <div className="p-8 sm:p-12 rounded-3xl bg-surface border-2 border-dashed border-border text-center space-y-4 shadow-warm my-4">
@@ -49,9 +41,9 @@ export default function AlbumsPage() {
             <FolderHeart className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-foreground">No Family Albums Yet</h3>
+            <h3 className="text-xl font-bold text-foreground">No Albums Yet</h3>
             <p className="text-sm text-muted-foreground max-w-md mx-auto mt-1">
-              Create folder-styled albums for birthdays, trips, and special celebrations. Photos added to albums never duplicate image files!
+              Create albums for family trips, birthdays, and celebrations.
             </p>
           </div>
           <Button onClick={() => setShowCreateModal(true)} className="gap-2">
@@ -60,7 +52,7 @@ export default function AlbumsPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {albums.map((album) => (
             <AlbumCard key={album.id} album={album} />
           ))}

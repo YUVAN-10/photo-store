@@ -56,8 +56,8 @@ export function Sidebar() {
 
         {/* Security & Privacy Badge */}
         <div className="p-3 rounded-2xl bg-secondary/10 border border-secondary/20 text-xs text-foreground/90">
-          <span className="font-bold text-secondary block mb-0.5">🔒 Private Family Cloud</span>
-          <span>Zero trackers • Direct client storage</span>
+          <span className="font-bold text-secondary block mb-0.5">🔒 Private Family Vault</span>
+          <span className="text-muted-foreground">Safe photo sharing for your family</span>
         </div>
 
         {/* Navigation Links */}

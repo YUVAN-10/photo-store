@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,12 @@ export function Modal({
   maxWidth = "md",
   className,
 }: ModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -37,7 +44,7 @@ export function Modal({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const maxWidthStyles = {
     sm: "max-w-md",
@@ -47,11 +54,11 @@ export function Modal({
     full: "max-w-6xl",
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-      {/* Backdrop */}
+  const modalContent = (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      {/* Full-screen Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/75 backdrop-blur-md transition-opacity animate-in fade-in-0 duration-200"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -61,12 +68,12 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         className={cn(
-          "relative w-full bg-surface text-foreground rounded-3xl p-6 sm:p-8 shadow-2xl border border-border z-10 my-8 transition-all animate-in fade-in-0 zoom-in-95",
+          "relative w-full bg-surface text-foreground rounded-3xl p-5 sm:p-8 shadow-2xl border border-border z-10 my-auto max-h-[92vh] overflow-y-auto transition-all animate-in fade-in-0 zoom-in-95 duration-200",
           maxWidthStyles[maxWidth],
           className
         )}
       >
-        <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex items-start justify-between gap-4 mb-4 pb-2 border-b border-border/50">
           <div>
             {title && (
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
@@ -74,17 +81,17 @@ export function Modal({
               </h2>
             )}
             {description && (
-              <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 leading-relaxed">
                 {description}
               </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="touch-target inline-flex items-center justify-center rounded-full hover:bg-muted p-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="touch-target inline-flex items-center justify-center rounded-full hover:bg-muted p-2 text-muted-foreground hover:text-foreground transition-colors shrink-0"
             aria-label="Close dialog"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
@@ -92,4 +99,7 @@ export function Modal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
+

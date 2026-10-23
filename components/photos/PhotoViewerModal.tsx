@@ -96,7 +96,7 @@ export function PhotoViewerModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-black/95 text-white flex flex-col justify-between select-none">
+      <div className="fixed inset-0 z-[100] bg-black/95 text-white flex flex-col justify-between select-none">
         {/* Top Controls Bar */}
         <div className="p-4 sm:p-6 flex items-center justify-between z-10 bg-gradient-to-b from-black/80 to-transparent">
           <div className="flex items-center gap-3">

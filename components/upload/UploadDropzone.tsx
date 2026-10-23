@@ -258,9 +258,9 @@ export function UploadDropzone() {
             <div className="p-4 rounded-2xl bg-secondary/15 border border-secondary/30 text-foreground text-sm flex items-center gap-3">
               <CheckCircle className="w-6 h-6 text-secondary shrink-0" />
               <div>
-                <p className="font-bold">Your photos are safely backed up!</p>
+                <p className="font-bold">Photos uploaded successfully!</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Verified with SHA-256 and stored safely. Your phone photos remain untouched.
+                  Saved safely to your family vault.
                 </p>
               </div>
             </div>
@@ -272,7 +272,7 @@ export function UploadDropzone() {
       <div className="p-4 rounded-2xl bg-muted/40 border border-border text-xs text-muted-foreground flex items-center gap-3">
         <ShieldCheck className="w-5 h-5 text-secondary shrink-0" />
         <span>
-          <strong>Privacy Guarantee</strong>: GPS and location metadata are automatically stripped before uploading. Only family members can view your photos.
+          <strong>Private &amp; Secure</strong>: Only your authorized family members can view your photos.
         </span>
       </div>
     </div>

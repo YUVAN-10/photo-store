@@ -79,6 +79,42 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
   const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
 
+  const syncServerPhotos = async () => {
+    try {
+      const res = await fetch("/api/photos");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.photos) && data.photos.length > 0) {
+          setPhotos((prev) => {
+            const merged = [...prev];
+            for (const sp of data.photos) {
+              const spFilename = sp.url.split("/").pop();
+              const existingIdx = merged.findIndex(
+                (p) =>
+                  p.id === sp.id ||
+                  (p.caption && sp.caption && p.caption.trim().toLowerCase() === sp.caption.trim().toLowerCase()) ||
+                  (spFilename && p.url.includes(spFilename))
+              );
+
+              if (existingIdx === -1) {
+                merged.push(sp);
+              } else {
+                merged[existingIdx] = {
+                  ...merged[existingIdx],
+                  url: sp.url,
+                  thumbUrl: sp.thumbUrl,
+                };
+              }
+            }
+            return merged;
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Could not sync server photos:", e);
+    }
+  };
+
   // Initialize and load from local storage
   useEffect(() => {
     try {
@@ -107,7 +143,17 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
       setMembers(mergedMembers);
 
       if (storedPhotos) {
-        setPhotos(JSON.parse(storedPhotos));
+        const parsed: Photo[] = JSON.parse(storedPhotos);
+        // Normalize any old raw.githubusercontent.com URLs to direct /api/photos/ proxy
+        const normalized = parsed.map((p) => {
+          if (p.url && p.url.includes("raw.githubusercontent.com")) {
+            const filename = p.url.split("/").pop();
+            const proxyUrl = `/api/photos/${filename}`;
+            return { ...p, url: proxyUrl, thumbUrl: proxyUrl };
+          }
+          return p;
+        });
+        setPhotos(normalized);
       }
 
       if (storedAlbums) {
@@ -128,6 +174,8 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
       console.error("Error restoring vault state:", e);
     } finally {
       setIsHydrated(true);
+      // Fetch latest photos from server/cloud so mobile and new devices show photos
+      syncServerPhotos();
     }
   }, []);
 
@@ -307,6 +355,9 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
     setCurrentMember(found);
     setIsAuthenticated(true);
     setIsDeviceApproved(true);
+
+    // Sync cloud/server photos immediately on login
+    syncServerPhotos();
 
     const newLog: AuditLogItem = {
       id: "aud-" + Date.now(),

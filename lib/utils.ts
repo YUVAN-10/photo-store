@@ -117,5 +117,5 @@ export async function uploadToGitHub(file: File): Promise<string> {
     throw new Error(`GitHub upload failed: ${err.message || res.statusText}`);
   }
 
-  return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/photos/${encodeURIComponent(filename)}`;
+  return `/api/photos/${encodeURIComponent(filename)}`;
 }

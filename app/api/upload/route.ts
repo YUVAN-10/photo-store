@@ -24,13 +24,20 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // 1. Save locally to photos/ directory immediately
-    const photosDir = path.join(process.cwd(), "photos");
-    if (!fs.existsSync(photosDir)) {
-      fs.mkdirSync(photosDir, { recursive: true });
+    // 1. Try to cache locally if filesystem is writable (e.g. local machine)
+    // Serverless platforms like Vercel have a read-only filesystem (/var/task),
+    // so we safely catch and ignore EROFS errors.
+    try {
+      const photosDir = path.join(process.cwd(), "photos");
+      if (!fs.existsSync(photosDir)) {
+        fs.mkdirSync(photosDir, { recursive: true });
+      }
+      const localFilePath = path.join(photosDir, filename);
+      fs.writeFileSync(localFilePath, buffer);
+    } catch (fsErr: any) {
+      // Read-only filesystem (Vercel / Lambda) - continue to GitHub storage
+      console.warn("Read-only filesystem, skipping local disk write:", fsErr?.message || fsErr);
     }
-    const localFilePath = path.join(photosDir, filename);
-    fs.writeFileSync(localFilePath, buffer);
 
     // 2. Upload to GitHub repository from the server using secure backend token
     const token =
@@ -51,34 +58,32 @@ export async function POST(req: NextRequest) {
       "main";
 
     if (token) {
-      try {
-        const base64 = buffer.toString("base64");
-        const ghRes = await fetch(
-          `https://api.github.com/repos/${owner}/${repo}/contents/photos/${encodeURIComponent(filename)}`,
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `token ${token}`,
-              Accept: "application/vnd.github.v3+json",
-              "Content-Type": "application/json",
-              "User-Agent": "FamilyVault-App",
-            },
-            body: JSON.stringify({
-              message: `Upload photo ${file.name}`,
-              content: base64,
-              branch,
-            }),
-          }
-        );
-
-        if (!ghRes.ok) {
-          const ghErr = await ghRes.json().catch(() => ({}));
-          console.warn("GitHub server upload warning:", ghErr);
-          // If GitHub fails, local disk already has it, so upload continues successfully
+      const base64 = buffer.toString("base64");
+      const ghRes = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/contents/photos/${encodeURIComponent(filename)}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `token ${token}`,
+            Accept: "application/vnd.github.v3+json",
+            "Content-Type": "application/json",
+            "User-Agent": "FamilyVault-App",
+          },
+          body: JSON.stringify({
+            message: `Upload photo ${cleanName}`,
+            content: base64,
+            branch,
+          }),
         }
-      } catch (ghErr) {
-        console.warn("GitHub upload network error:", ghErr);
+      );
+
+      if (!ghRes.ok) {
+        const ghErr = await ghRes.json().catch(() => ({}));
+        console.error("GitHub upload API error:", ghErr);
+        throw new Error(ghErr.message || `GitHub storage error: ${ghRes.statusText}`);
       }
+    } else {
+      throw new Error("Missing GitHub storage credentials");
     }
 
     const photoUrl = `/api/photos/${encodeURIComponent(filename)}`;

@@ -312,16 +312,24 @@ export function FamilyMemberList() {
           </div>
           <div>
             <label className="block text-sm font-bold text-foreground mb-1">
-              Phone Number *
+              Indian Mobile Number (10 Digits) *
             </label>
-            <input
-              type="tel"
-              required
-              placeholder="(555) 000-0000"
-              value={newMemberPhone}
-              onChange={(e) => setNewMemberPhone(e.target.value)}
-              className="touch-target w-full px-4 py-3 rounded-2xl bg-surface border border-border text-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
-            />
+            <div className="flex items-center rounded-2xl bg-surface border border-border focus-within:ring-2 focus-within:ring-primary overflow-hidden shadow-sm">
+              <span className="px-3.5 py-3 bg-muted/40 border-r border-border font-bold text-sm select-none text-foreground flex items-center gap-1">
+                <span>🇮🇳</span>
+                <span>+91</span>
+              </span>
+              <input
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                required
+                placeholder="99651 43222"
+                value={newMemberPhone}
+                onChange={(e) => setNewMemberPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                className="touch-target w-full px-4 py-3 bg-transparent text-foreground text-base focus:outline-none font-medium"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-bold text-foreground mb-1">

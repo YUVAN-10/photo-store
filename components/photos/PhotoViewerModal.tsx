@@ -21,7 +21,7 @@ import { formatDate, formatBytes } from "@/lib/utils";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { downloadPhotoFile } from "@/lib/download-utils";
-import { DownloadCelebrationModal } from "./DownloadCelebrationModal";
+import { DownloadSuccessToast } from "./DownloadSuccessToast";
 
 interface PhotoViewerModalProps {
   photo: Photo | null;
@@ -290,8 +290,8 @@ export function PhotoViewerModal({
         </div>
       </Modal>
 
-      {/* Keepsake Celebration Modal */}
-      <DownloadCelebrationModal
+      {/* Download Success Animated Toast */}
+      <DownloadSuccessToast
         photo={photo}
         isOpen={showCelebration}
         onClose={() => setShowCelebration(false)}

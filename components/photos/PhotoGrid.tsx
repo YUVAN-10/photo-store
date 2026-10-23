@@ -17,7 +17,7 @@ import {
 import { Photo } from "@/lib/types";
 import { PhotoCard } from "./PhotoCard";
 import { PhotoViewerModal } from "./PhotoViewerModal";
-import { DownloadCelebrationModal } from "./DownloadCelebrationModal";
+import { DownloadSuccessToast } from "./DownloadSuccessToast";
 import { formatMonthYear } from "@/lib/utils";
 import { downloadPhotoFile } from "@/lib/download-utils";
 import { Button } from "@/components/ui/Button";
@@ -314,8 +314,8 @@ export function PhotoGrid({
         />
       )}
 
-      {/* Keepsake Celebration Modal */}
-      <DownloadCelebrationModal
+      {/* Download Success Animated Toast */}
+      <DownloadSuccessToast
         photo={celebrationPhoto}
         isOpen={!!celebrationPhoto}
         onClose={() => setCelebrationPhoto(null)}

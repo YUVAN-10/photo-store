@@ -37,17 +37,21 @@ export async function GET(
     const localPath = path.join(process.cwd(), "photos", decodedFilename);
 
     // 1. Check local filesystem first
-    if (fs.existsSync(localPath)) {
-      const fileBuffer = fs.readFileSync(localPath);
-      const mimeType = getMimeType(decodedFilename);
+    try {
+      if (fs.existsSync(localPath)) {
+        const fileBuffer = fs.readFileSync(localPath);
+        const mimeType = getMimeType(decodedFilename);
 
-      return new NextResponse(fileBuffer, {
-        headers: {
-          "Content-Type": mimeType,
-          "Cache-Control": "public, max-age=31536000, immutable",
-          "Content-Length": fileBuffer.length.toString(),
-        },
-      });
+        return new NextResponse(fileBuffer, {
+          headers: {
+            "Content-Type": mimeType,
+            "Cache-Control": "public, max-age=31536000, immutable",
+            "Content-Length": fileBuffer.length.toString(),
+          },
+        });
+      }
+    } catch (fsErr) {
+      console.warn("Could not read local photo file:", fsErr);
     }
 
     // 2. Fallback to GitHub raw content via server proxy (bypasses ISP blocks in India)

@@ -11,51 +11,53 @@ export async function GET() {
     const photos: Photo[] = [];
 
     // 1. Read from local photos directory if available
-    if (fs.existsSync(photosDir)) {
-      const files = fs.readdirSync(photosDir);
-      for (const file of files) {
-        if (file === ".keep" || file.startsWith(".")) continue;
+    try {
+      if (fs.existsSync(photosDir)) {
+        const files = fs.readdirSync(photosDir);
+        for (const file of files) {
+          if (file === ".keep" || file.startsWith(".")) continue;
 
-        const filePath = path.join(photosDir, file);
-        const stats = fs.statSync(filePath);
+          const filePath = path.join(photosDir, file);
+          const stats = fs.statSync(filePath);
 
-        // Extract friendly caption from filename (e.g., 1792738235046_YUVANSHANKAR-PHOTO.jpeg)
-        let caption = file.replace(/\.[^/.]+$/, "");
-        if (caption.includes("_")) {
-          caption = caption.substring(caption.indexOf("_") + 1);
-        }
-        caption = caption.replace(/[-_]/g, " ");
-
-        // Parse date from timestamp if present
-        let takenAt = stats.mtime.toISOString();
-        const timestampMatch = file.match(/^(\d{13})_/);
-        if (timestampMatch) {
-          const parsed = new Date(parseInt(timestampMatch[1]));
-          if (!isNaN(parsed.getTime())) {
-            takenAt = parsed.toISOString();
+          let caption = file.replace(/\.[^/.]+$/, "");
+          if (caption.includes("_")) {
+            caption = caption.substring(caption.indexOf("_") + 1);
           }
-        }
+          caption = caption.replace(/[-_]/g, " ");
 
-        photos.push({
-          id: `ph-${file}`,
-          familyId: "fam-vault",
-          uploaderId: "mem-9965143222",
-          uploaderName: "Yuvan",
-          uploaderRelation: "Son (Admin)",
-          url: `/api/photos/${encodeURIComponent(file)}`,
-          thumbUrl: `/api/photos/${encodeURIComponent(file)}`,
-          width: 2560,
-          height: 1707,
-          sizeBytes: stats.size,
-          thumbSizeBytes: Math.floor(stats.size * 0.1),
-          takenAt,
-          uploadedAt: stats.mtime.toISOString(),
-          caption: caption || "Family Memory",
-          isFavorite: false,
-          albumIds: [],
-          hash: `hash-${file}`,
-        });
+          let takenAt = stats.mtime.toISOString();
+          const timestampMatch = file.match(/^(\d{13})_/);
+          if (timestampMatch) {
+            const parsed = new Date(parseInt(timestampMatch[1]));
+            if (!isNaN(parsed.getTime())) {
+              takenAt = parsed.toISOString();
+            }
+          }
+
+          photos.push({
+            id: `ph-${file}`,
+            familyId: "fam-vault",
+            uploaderId: "mem-9965143222",
+            uploaderName: "Yuvan",
+            uploaderRelation: "Son (Admin)",
+            url: `/api/photos/${encodeURIComponent(file)}`,
+            thumbUrl: `/api/photos/${encodeURIComponent(file)}`,
+            width: 2560,
+            height: 1707,
+            sizeBytes: stats.size,
+            thumbSizeBytes: Math.floor(stats.size * 0.1),
+            takenAt,
+            uploadedAt: stats.mtime.toISOString(),
+            caption: caption || "Family Memory",
+            isFavorite: false,
+            albumIds: [],
+            hash: `hash-${file}`,
+          });
+        }
       }
+    } catch (fsErr) {
+      console.warn("Could not read local photos directory:", fsErr);
     }
 
     // 2. Also try fetching from GitHub repository contents if remote has more files
@@ -94,7 +96,6 @@ export async function GET() {
                 continue;
               }
 
-              // Check if already in photos
               const alreadyExists = photos.some(
                 (p) => p.id === `ph-${item.name}` || p.url.includes(item.name)
               );
@@ -134,7 +135,6 @@ export async function GET() {
       }
     }
 
-    // Sort newest first
     photos.sort(
       (a, b) => new Date(b.takenAt || b.uploadedAt).getTime() - new Date(a.takenAt || a.uploadedAt).getTime()
     );

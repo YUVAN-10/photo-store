@@ -57,33 +57,35 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_GITHUB_BRANCH ||
       "main";
 
-    if (token) {
-      const base64 = buffer.toString("base64");
-      const ghRes = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/photos/${encodeURIComponent(filename)}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `token ${token}`,
-            Accept: "application/vnd.github.v3+json",
-            "Content-Type": "application/json",
-            "User-Agent": "FamilyVault-App",
-          },
-          body: JSON.stringify({
-            message: `Upload photo ${cleanName}`,
-            content: base64,
-            branch,
-          }),
-        }
+    if (!token) {
+      throw new Error(
+        "Missing GITHUB_TOKEN on your server. Please add GITHUB_TOKEN in your Vercel Project Settings (Settings -> Environment Variables)."
       );
+    }
 
-      if (!ghRes.ok) {
-        const ghErr = await ghRes.json().catch(() => ({}));
-        console.error("GitHub upload API error:", ghErr);
-        throw new Error(ghErr.message || `GitHub storage error: ${ghRes.statusText}`);
+    const base64 = buffer.toString("base64");
+    const ghRes = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/photos/${encodeURIComponent(filename)}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+          "User-Agent": "FamilyVault-App",
+        },
+        body: JSON.stringify({
+          message: `Upload photo ${cleanName}`,
+          content: base64,
+          branch,
+        }),
       }
-    } else {
-      throw new Error("Missing GitHub storage credentials");
+    );
+
+    if (!ghRes.ok) {
+      const ghErr = await ghRes.json().catch(() => ({}));
+      console.error("GitHub upload API error:", ghErr);
+      throw new Error(ghErr.message || `GitHub storage error: ${ghRes.statusText}`);
     }
 
     const photoUrl = `/api/photos/${encodeURIComponent(filename)}`;

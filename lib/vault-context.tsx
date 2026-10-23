@@ -319,7 +319,7 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
     if (!isAuthorizedPhone(phone)) {
       return {
         success: false,
-        error: "Access denied. Only authorized family phone numbers (9965143222, 9677528787, 6369124248, 9092133222) can log in.",
+        error: "Access denied. Only authorized family phone numbers can log in.",
       };
     }
 

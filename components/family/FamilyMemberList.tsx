@@ -47,7 +47,7 @@ export function FamilyMemberList() {
     if (!newMemberName.trim() || !newMemberPhone.trim()) return;
 
     if (!isAuthorizedPhone(newMemberPhone)) {
-      setMemberError("Only authorized family phone numbers (9965143222, 9677528787, 6369124248, 9092133222) can be registered.");
+      setMemberError("Only authorized family phone numbers can be registered.");
       return;
     }
 
@@ -190,7 +190,9 @@ export function FamilyMemberList() {
                     )}
                   </div>
                   <p className="text-sm text-secondary font-medium">{member.relation}</p>
-                  <p className="text-xs text-muted-foreground">{member.phone}</p>
+                  <p className="text-xs text-muted-foreground font-mono">
+                    +91 ••••• ••{member.phone.replace(/\D/g, "").slice(-3)}
+                  </p>
                 </div>
               </div>
 
@@ -324,7 +326,7 @@ export function FamilyMemberList() {
                 inputMode="numeric"
                 maxLength={10}
                 required
-                placeholder="99651 43222"
+                placeholder="Enter 10-digit number"
                 value={newMemberPhone}
                 onChange={(e) => setNewMemberPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                 className="touch-target w-full px-4 py-3 bg-transparent text-foreground text-base focus:outline-none font-medium"

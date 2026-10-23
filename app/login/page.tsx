@@ -58,7 +58,7 @@ export default function LoginPage() {
     }
 
     if (!isAuthorizedPhone(cleanDigits)) {
-      setErrorMessage(`Access denied: +91 ${cleanDigits} is not an authorized family member.`);
+      setErrorMessage("Access denied. This mobile number is not authorized for FamilyVault.");
       return;
     }
 
@@ -205,7 +205,7 @@ export default function LoginPage() {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={10}
-                placeholder="99651 43222"
+                placeholder="Enter 10-digit number"
                 value={phoneNumber}
                 onChange={handlePhoneChange}
                 className="touch-target w-full px-4 py-3.5 bg-transparent text-foreground text-lg sm:text-xl font-bold tracking-wider placeholder:text-muted-foreground/40 focus:outline-none"

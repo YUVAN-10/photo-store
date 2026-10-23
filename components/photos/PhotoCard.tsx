@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Heart, Check } from "lucide-react";
+import { Heart, Check, Download } from "lucide-react";
 import { Photo } from "@/lib/types";
 import { useVault } from "@/lib/vault-context";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ interface PhotoCardProps {
   isSelectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: () => void;
+  onDownload?: (photo: Photo) => void;
 }
 
 export function PhotoCard({
@@ -20,6 +21,7 @@ export function PhotoCard({
   isSelectionMode = false,
   isSelected = false,
   onToggleSelect,
+  onDownload,
 }: PhotoCardProps) {
   const { toggleFavorite } = useVault();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -59,6 +61,22 @@ export function PhotoCard({
           imageLoaded ? "opacity-100" : "opacity-0"
         )}
       />
+
+      {/* Quick Download Button (Animated) */}
+      {!isSelectionMode && onDownload && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDownload(photo);
+          }}
+          className="touch-target absolute top-2 left-2 z-10 w-9 h-9 rounded-full bg-black/50 hover:bg-black/75 backdrop-blur-md text-white flex items-center justify-center transition-all hover:scale-110 active:scale-90 opacity-90 sm:opacity-0 group-hover:opacity-100 shadow-md"
+          aria-label="Download photo"
+          title="Download photo"
+        >
+          <Download className="w-4 h-4 text-white" />
+        </button>
+      )}
 
       {/* Selection Checkbox (visible in selection mode or on hover) */}
       {isSelectionMode && (

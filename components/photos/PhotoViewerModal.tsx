@@ -20,6 +20,8 @@ import { useVault } from "@/lib/vault-context";
 import { formatDate, formatBytes } from "@/lib/utils";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { downloadPhotoFile } from "@/lib/download-utils";
+import { DownloadCelebrationModal } from "./DownloadCelebrationModal";
 
 interface PhotoViewerModalProps {
   photo: Photo | null;
@@ -38,6 +40,7 @@ export function PhotoViewerModal({
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const [showAddToAlbum, setShowAddToAlbum] = useState<boolean>(false);
+  const [showCelebration, setShowCelebration] = useState<boolean>(false);
 
   // Reset zoom on photo change
   useEffect(() => {
@@ -85,13 +88,10 @@ export function PhotoViewerModal({
     onClose();
   };
 
-  const handleDownload = () => {
-    const link = document.createElement("a");
-    link.href = photo.url;
-    link.download = `familyvault-${photo.id}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async () => {
+    if (!photo) return;
+    await downloadPhotoFile(photo);
+    setShowCelebration(true);
   };
 
   return (
@@ -289,6 +289,13 @@ export function PhotoViewerModal({
           })}
         </div>
       </Modal>
+
+      {/* Keepsake Celebration Modal */}
+      <DownloadCelebrationModal
+        photo={photo}
+        isOpen={showCelebration}
+        onClose={() => setShowCelebration(false)}
+      />
     </>
   );
 }

@@ -17,7 +17,9 @@ import {
 import { Photo } from "@/lib/types";
 import { PhotoCard } from "./PhotoCard";
 import { PhotoViewerModal } from "./PhotoViewerModal";
+import { DownloadCelebrationModal } from "./DownloadCelebrationModal";
 import { formatMonthYear } from "@/lib/utils";
+import { downloadPhotoFile } from "@/lib/download-utils";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { useVault } from "@/lib/vault-context";
@@ -38,11 +40,17 @@ export function PhotoGrid({
 }: PhotoGridProps) {
   const { currentMember, albums, addPhotoToAlbum, toggleFavorite, deletePhoto } = useVault();
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [celebrationPhoto, setCelebrationPhoto] = useState<Photo | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [uploaderFilter, setUploaderFilter] = useState<string>("all");
   const [isSelectionMode, setIsSelectionMode] = useState<boolean>(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showBulkAlbumModal, setShowBulkAlbumModal] = useState<boolean>(false);
+
+  const handleDownloadPhoto = async (photo: Photo) => {
+    await downloadPhotoFile(photo);
+    setCelebrationPhoto(photo);
+  };
 
   // Available uploaders for filter
   const uploaders = useMemo(() => {
@@ -289,6 +297,7 @@ export function PhotoGrid({
                 isSelectionMode={isSelectionMode}
                 isSelected={selectedIds.includes(photo.id)}
                 onToggleSelect={() => handleToggleSelect(photo.id)}
+                onDownload={handleDownloadPhoto}
               />
             ))}
           </div>
@@ -304,6 +313,13 @@ export function PhotoGrid({
           onSelectPhoto={(p) => setSelectedPhoto(p)}
         />
       )}
+
+      {/* Keepsake Celebration Modal */}
+      <DownloadCelebrationModal
+        photo={celebrationPhoto}
+        isOpen={!!celebrationPhoto}
+        onClose={() => setCelebrationPhoto(null)}
+      />
 
       {/* Bulk Add to Album Modal */}
       <Modal

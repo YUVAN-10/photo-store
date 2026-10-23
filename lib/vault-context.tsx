@@ -627,6 +627,7 @@ const newPhoto: Photo = {
         
 
         setPhotos((prev) => [newPhoto, ...prev]);
+        syncServerPhotos();
 
         if (targetAlbumId) {
           setAlbums((prev) =>

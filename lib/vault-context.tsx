@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { FamilyMember, Photo, Album, AuditLogItem } from "./types";
 import { uploadToGitHub } from "./utils";
+import { AUTHORIZED_PHONE_NUMBERS, isAuthorizedPhone, DEFAULT_FAMILY_MEMBERS } from "./demo-data";
+
 
 export interface PendingUpload {
   id: string;
@@ -89,8 +91,20 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
       let parsedMembers: FamilyMember[] = [];
       if (storedMembers) {
         parsedMembers = JSON.parse(storedMembers);
-        setMembers(parsedMembers);
       }
+
+      // Ensure all authorized family members exist in members list
+      const mergedMembers = [...parsedMembers];
+      for (const defMember of DEFAULT_FAMILY_MEMBERS) {
+        const defLast10 = defMember.phone.slice(-10);
+        const exists = mergedMembers.some(
+          (m) => m.phone.replace(/\D/g, "").slice(-10) === defLast10
+        );
+        if (!exists) {
+          mergedMembers.push(defMember);
+        }
+      }
+      setMembers(mergedMembers);
 
       if (storedPhotos) {
         setPhotos(JSON.parse(storedPhotos));
@@ -155,11 +169,18 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
     relation: string;
     phone: string;
   }): FamilyMember => {
+    if (!isAuthorizedPhone(phone)) {
+      throw new Error("Access denied. Only authorized family phone numbers are allowed.");
+    }
+
+    const cleanPhone = phone.replace(/\D/g, "");
+    const last10 = cleanPhone.slice(-10);
+
     const adminMember: FamilyMember = {
-      id: "mem-" + Date.now(),
+      id: "mem-" + last10,
       name,
       relation,
-      phone,
+      phone: last10,
       avatar: "",
       role: "admin",
       storageUsedBytes: 0,
@@ -181,7 +202,7 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
       details: `Initialized vault with administrator ${name} (${phone})`,
     };
 
-    setMembers([adminMember]);
+    setMembers((prev) => [adminMember, ...prev.filter((m) => m.phone.slice(-10) !== last10)]);
     setCurrentMember(adminMember);
     setIsAuthenticated(true);
     setIsDeviceApproved(true);
@@ -202,11 +223,18 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
     phone: string;
     role?: "admin" | "member";
   }): FamilyMember => {
+    if (!isAuthorizedPhone(phone)) {
+      throw new Error("Access denied. Only authorized family phone numbers can be added.");
+    }
+
+    const cleanPhone = phone.replace(/\D/g, "");
+    const last10 = cleanPhone.slice(-10);
+
     const newMember: FamilyMember = {
-      id: "mem-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6),
+      id: "mem-" + last10,
       name,
       relation,
-      phone,
+      phone: last10,
       avatar: "",
       role,
       storageUsedBytes: 0,
@@ -220,7 +248,7 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
       ],
     };
 
-    setMembers((prev) => [...prev, newMember]);
+    setMembers((prev) => [...prev.filter((m) => m.phone.slice(-10) !== last10), newMember]);
 
     const newLog: AuditLogItem = {
       id: "aud-" + Date.now(),
@@ -237,24 +265,43 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
   // Simple Phone Login
   const loginWithPhone = (phone: string, rememberDevice = true) => {
     const cleanPhone = phone.replace(/[^0-9]/g, "");
+    const last10 = cleanPhone.slice(-10);
 
-    if (members.length === 0) {
+    // Strict Authorization: Only allow the 4 authorized family phone numbers
+    if (!isAuthorizedPhone(phone)) {
       return {
         success: false,
-        error: "No family members have been registered yet. Please complete initial setup.",
+        error: "Access denied. Only authorized family phone numbers (9965143222, 9677528787, 6369124248, 9092133222) can log in.",
       };
     }
 
-    const found = members.find((m) => {
-      const mClean = m.phone.replace(/[^0-9]/g, "");
-      return mClean.includes(cleanPhone) || cleanPhone.includes(mClean);
+    let found = members.find((m) => {
+      const mClean = m.phone.replace(/[^0-9]/g, "").slice(-10);
+      return mClean === last10;
     });
 
     if (!found) {
-      return {
-        success: false,
-        error: "This phone number hasn't been added to FamilyVault yet. Please ask your family administrator to invite you.",
+      const defaultProfile = DEFAULT_FAMILY_MEMBERS.find(
+        (m) => m.phone.slice(-10) === last10
+      );
+      found = defaultProfile || {
+        id: "mem-" + last10,
+        name: "Family Member",
+        relation: "Family",
+        phone: last10,
+        avatar: "",
+        role: "member",
+        storageUsedBytes: 0,
+        approvedDevices: [
+          {
+            deviceId: "dev-" + Math.random().toString(36).substring(2, 8),
+            deviceName: "Authorized Phone",
+            lastSeen: new Date().toISOString(),
+            authorizedAt: new Date().toISOString(),
+          },
+        ],
       };
+      setMembers((prev) => [...prev.filter((m) => m.phone.replace(/[^0-9]/g, "").slice(-10) !== last10), found!]);
     }
 
     setCurrentMember(found);

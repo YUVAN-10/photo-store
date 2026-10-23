@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Camera, ShieldCheck, ArrowRight, Smartphone, AlertCircle, User, HeartHandshake } from "lucide-react";
 import { useVault } from "@/lib/vault-context";
 import { Button } from "@/components/ui/Button";
+import { isAuthorizedPhone } from "@/lib/demo-data";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,6 +28,11 @@ export default function LoginPage() {
 
     if (!phoneNumber.trim()) {
       setErrorMessage("Please enter your mobile phone number.");
+      return;
+    }
+
+    if (!isAuthorizedPhone(phoneNumber)) {
+      setErrorMessage("Access denied. Only authorized family phone numbers are allowed to log in.");
       return;
     }
 

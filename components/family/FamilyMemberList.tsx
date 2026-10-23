@@ -16,6 +16,7 @@ import { useVault } from "@/lib/vault-context";
 import { formatBytes, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { isAuthorizedPhone } from "@/lib/demo-data";
 
 export function FamilyMemberList() {
   const {
@@ -36,24 +37,36 @@ export function FamilyMemberList() {
   const [newMemberRelation, setNewMemberRelation] = useState("");
   const [newMemberPhone, setNewMemberPhone] = useState("");
   const [newMemberRole, setNewMemberRole] = useState<"admin" | "member">("member");
+  const [memberError, setMemberError] = useState("");
 
   const isAdmin = currentMember?.role === "admin" || members.length === 0;
 
   const handleAddMember = (e: React.FormEvent) => {
     e.preventDefault();
+    setMemberError("");
     if (!newMemberName.trim() || !newMemberPhone.trim()) return;
 
-    addFamilyMember({
-      name: newMemberName.trim(),
-      relation: newMemberRelation.trim() || "Family Member",
-      phone: newMemberPhone.trim(),
-      role: newMemberRole,
-    });
+    if (!isAuthorizedPhone(newMemberPhone)) {
+      setMemberError("Only authorized family phone numbers (9965143222, 9677528787, 6369124248, 9092133222) can be registered.");
+      return;
+    }
 
-    setShowAddMember(false);
-    setNewMemberName("");
-    setNewMemberRelation("");
-    setNewMemberPhone("");
+    try {
+      addFamilyMember({
+        name: newMemberName.trim(),
+        relation: newMemberRelation.trim() || "Family Member",
+        phone: newMemberPhone.trim(),
+        role: newMemberRole,
+      });
+
+      setShowAddMember(false);
+      setNewMemberName("");
+      setNewMemberRelation("");
+      setNewMemberPhone("");
+      setMemberError("");
+    } catch (err: any) {
+      setMemberError(err.message || "Failed to add member.");
+    }
   };
 
   const handleExportData = () => {
@@ -264,6 +277,12 @@ export function FamilyMemberList() {
         description="Register a family member's phone number. No passwords or OTPs required—they simply enter their phone number on their approved device."
       >
         <form onSubmit={handleAddMember} className="space-y-4 pt-2">
+          {memberError && (
+            <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{memberError}</span>
+            </div>
+          )}
           <div>
             <label className="block text-sm font-bold text-foreground mb-1">
               Display Name *

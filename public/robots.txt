@@ -1,0 +1,4 @@
+# FamilyVault Private Family Storage
+# Disallow all indexing and crawling
+User-agent: *
+Disallow: /

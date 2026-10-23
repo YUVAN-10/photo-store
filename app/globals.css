@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #F8F4EC;
+  --surface: #FFFFFF;
+  --text: #493B32;
+  --primary: #C87558;
+  --primary-hover: #b46347;
+  --secondary: #82947A;
+  --secondary-hover: #718269;
+  --muted: #EAE2D6;
+  --muted-foreground: #7E7063;
+  --border: #DFD5C6;
+}
+
+.dark {
+  --background: #211F1B;
+  --surface: #302C27;
+  --text: #F8F4EC;
+  --primary: #DE967A;
+  --primary-hover: #e8a78e;
+  --secondary: #A5B79A;
+  --secondary-hover: #b5c7ab;
+  --muted: #454039;
+  --muted-foreground: #B6ACA1;
+  --border: #4D463E;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Ensure minimum 48px touch targets for accessibility */
+button,
+a,
+input,
+select {
+  touch-action: manipulation;
+}
+
+.touch-target {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Smooth transitions */
+.transition-warm {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
